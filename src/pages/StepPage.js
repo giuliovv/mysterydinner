@@ -1,7 +1,8 @@
 // StepPage.js
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, TextField } from '@mui/material';
-import RadioButtonStep from '../components/RadioButtonStep'; // Ensure this is correctly imported
+import { useNavigate } from 'react-router-dom';
+import RadioButtonStep from '../components/RadioButtonStep';
 
 const initialSteps = [
     { 
@@ -38,6 +39,7 @@ function StepPage() {
     const [selectedOption, setSelectedOption] = useState('');
     const [customText, setCustomText] = useState('');
     const [prevParticipantCount, setPrevParticipantCount] = useState(0);
+    const navigate = useNavigate();
   
     useEffect(() => {
         const participantCount = parseInt(answers[1], 10); // Assuming index 1 is where participant count is stored
@@ -63,11 +65,13 @@ function StepPage() {
         }
       }, [answers, prevParticipantCount]);
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
+      const handleNext = () => {
+        if (currentStep < steps.length - 1) {
+          setCurrentStep(currentStep + 1);
+        } else {
+          navigate('/final', { state: { participants: answers } });
+        }
+      };
 
   const handleBack = () => {
     if (currentStep > 0) {
@@ -110,6 +114,11 @@ function StepPage() {
     const newAnswers = [...answers];
     newAnswers[currentStep] = e.target.value;
     setAnswers(newAnswers);
+  };
+
+  const handleFinish = () => {
+    // Structure participants' data if needed
+    navigate('/final', { state: { participants: answers.filter(answer => typeof answer === 'object') } });
   };
 
   const renderStepContent = (step, stepIndex) => {
@@ -177,28 +186,26 @@ function StepPage() {
       {renderStepContent(steps[currentStep], currentStep)}
       <Box
         sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          width: '100%', // Adjust the width as necessary
-          maxWidth: '400px', // Set a max width for the buttons if desired
-          mt: 2
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            width: '100%', 
+            maxWidth: '400px', 
+            mt: 2
         }}
-      >
-        <Button
-          variant="contained"
-          disabled={currentStep === 0}
-          onClick={handleBack}
         >
-          Previous
-        </Button>
         <Button
-          variant="contained"
-          onClick={handleNext}
-          disabled={currentStep === steps.length - 1}
+            variant="contained"
+            disabled={currentStep === 0}
+            onClick={handleBack}
         >
-          Next
+            Previous
         </Button>
-      </Box>
+        {currentStep === steps.length - 1 ? (
+            <Button variant="contained" onClick={handleFinish}>Finish</Button>
+            ) : (
+            <Button variant="contained" onClick={handleNext}>Next</Button>
+            )}
+        </Box>
     </Box>
   );
 }

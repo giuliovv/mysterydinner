@@ -18,6 +18,7 @@ const theme = createTheme({
       primary: '#ffffff', // Set the primary text color to white
       secondary: '#b2b2b2', // A lighter shade for secondary text
       disabled: '#7f7f7f', // Grey for disabled text
+      cardTitle: 'black'
     },
   },
   typography: {
