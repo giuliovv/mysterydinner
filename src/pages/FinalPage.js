@@ -1,88 +1,171 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, Card, CardContent, Typography } from '@mui/material';
+import { Box, List, ListItem, Card, CardContent, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import OpenAI from 'openai';
+import API_KEY from '../components/ApiKey';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, dangerouslyAllowBrowser: true });
+// const openai = new OpenAI({ apiKey: process.env.REACT_APP_SECRET_NAME, dangerouslyAllowBrowser: true });
+const openai = new OpenAI({ apiKey: API_KEY, dangerouslyAllowBrowser: true })
 
 function FinalPage() {
   const [roles, setRoles] = useState([]);
   const [plot, setPlot] = useState([]);
   const location = useLocation();
 
-  const participants = useMemo(() => {
-    // Extracting participants from the navigation state
-    return location.state ? location.state.participants : [];
-  }, [location.state]);
+  const [settingPlot, participants] = useMemo(() => {
+    const state = location.state || {};
+    const setting = state.setting || '';
+    const participants = state.participants || [];
 
-  async function generateRolesAndPlot(participants) {
-    // Construct the initial messages sent to the model, including instructions
-    let messages = [
-      {
-        role: "system",
-        content: "Create a unique role for each participant in a fictional scenario and generate a general plot. Each participant's role should complement the overall story.",
-      },
-    ];
-  
-    // Add each participant as a user message
-    participants.forEach((participant, index) => {
-      messages.push({ role: "user", content: `Participant #${index + 1}: ${participant.nickname}. ${participant.description}` });
-    });
-  
-    // Add a final message to prompt for the plot
-    messages.push({ role: "user", content: "What is the general plot of the story?" });
-  
-    try {
-      // Send the completion request to OpenAI
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: messages,
-        max_tokens: 1024, // Adjust as needed
-      });
-  
-      const generatedContent = completion.data.choices[0].message.content;
-  
-      // TODO: Process the generated content to extract individual roles and the general plot
-      // This may require some parsing or additional logic depending on how the model structures its response
-  
-      console.log(generatedContent); // Placeholder to demonstrate output
-      return generatedContent; // Or return a structured response with roles and plot
-    } catch (error) {
-      console.error("Error calling OpenAI:", error);
-      // Handle errors appropriately in your application context
-    }
-  }
+    return [setting, participants];
+  }, [location.state]);
 
   useEffect(() => {
 
+    async function generateRolesAndPlot(participants) {
+        // Construct the initial messages sent to the model, including instructions
+        let messages = [
+          {
+            role: "system",
+            content: `
+            Objective:
+            Craft a murder mystery dinner plot with specific roles and objectives for each guest, 
+            ensuring their actions and motives are clear and directly influence the unfolding of the story.
+            
+            Output Format is a json like:
+            {
+                "roles": [
+                  {
+                    "user": "Name of the Participant",
+                    "card": {
+                      "background": "Brief background relevant to the murder mystery context.",
+                      "objective": "Specific, actionable objective that guides the participant's actions.",
+                      "secret": "A personal secret, a wrongdoing/secret relationship that adds depth to the character and motivates their actions.",
+                      "item": "An item or piece of information they possess or seek, pivotal to their objectives."
+                    }
+                  }
+                  // Additional roles follow the same structure
+                ],
+                "plot": "A focused, actionable plot that sets the stage for the mystery and outlines the key event – the murder – around which all characters' objectives orbit. It should provide the necessary setup for the characters' interactions, secrets, and objectives to intertwine and drive the narrative towards solving the murder."
+              }
+
+            Example, but invent something new:
+
+            {
+                "roles": [
+                  {
+                    "user": "Giulio",
+                    "card": {
+                      "background": "Host of the dinner party, known for a love of rare artifacts.",
+                      "objective": "Ensure the safety of the prized artifact displayed tonight.",
+                      "secret": "The artifact is a fake; the real one was stolen a week ago.",
+                      "item": "A mysterious key to a hidden vault within the mansion."
+                    }
+                  },
+                  {
+                    "user": "Mariana",
+                    "card": {
+                      "background": "A renowned art historian and Giulio's old friend.",
+                      "objective": "Uncover the truth about the artifact's authenticity.",
+                      "secret": "Mariana suspects the artifact is a fake and knows who might be the thief.",
+                      "item": "A letter from an anonymous source hinting at the artifact's history."
+                    }
+                  }
+                  // Additional roles with similarly detailed objectives and items
+                ],
+                "plot": "During a stormy evening at a grand mansion, a dinner party turns into a scene of a crime when the host, Giulio, 
+                reveals the mansion's original owner was murdered decades ago, and the case was never solved.
+                 Tonight, the unveiling of a rare artifact rumored to be connected to the unsolved murder draws attention. 
+                 However, the artifact goes missing, and the guests are thrust into a web of deceit as they navigate through secrets, 
+                 betrayals, and hidden motives to uncover the thief among them and solve the ancient murder mystery."
+              }
+              
+            
+             The setting of the story is `+settingPlot,
+          },
+        ];
+      
+        // Add each participant as a user message
+        participants.forEach((participant, index) => {
+          messages.push({ role: "user", content: `Participant #${index + 1}: ${participant.nickname}. ${participant.description}` });
+        });
+      
+        // Add a final message to prompt for the plot
+        messages.push({ role: "user", content: "What is the general plot of the story?" });
+      
+        try {
+          // Send the completion request to OpenAI
+          const completion = await openai.chat.completions.create({
+            // model: "gpt-3.5-turbo",
+            model: "gpt-4-turbo-preview",
+            messages: messages,
+            response_format: { "type": "json_object" },
+            temperature: 1.2,
+            // max_tokens: 1024,
+          });
+      
+          const generatedContent = completion.choices[0].message.content;
+          const responseData = JSON.parse(generatedContent);
+
+          setRoles(responseData.roles);
+          setPlot(responseData.plot);
+
+          console.log(generatedContent);
+      
+          return generatedContent;
+        } catch (error) {
+          console.error("Error calling OpenAI:", error);
+        }
+      }
+
     if (participants.length > 0) {
-        generateRolesAndPlot([
-            { nickname: "Alice", description: "keen observer and quick thinker" },
-            { nickname: "Bob", description: "strong and courageous" },
-            // Add more participants as needed
-          ]);
+        generateRolesAndPlot(participants);
     }
   }, [participants]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4 }}>
-      {roles.map((participant, index) => (
-        <Card key={index} sx={{ minWidth: 275, mb: 2 }}>
-          <CardContent>
-            <Typography variant="h5" component="div" sx={{ color: 'text.cardTitle' }}>
-              {participant.nickname || "Participant"}
-            </Typography>
-            <Typography sx={{ mb: 1.5 }} color="text.secondary">
-              {participant.description || "No description provided"}
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.cardTitle' }}>
-              Role: {participant.role}
-            </Typography>
-          </CardContent>
-        </Card>
-      ))}
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4, width: '100%' }}>
+      <List
+        sx={{
+          width: '100%',
+          maxHeight: 'calc(100vh - 64px)', 
+          overflowY: 'auto',
+        }}
+      >
+        {/* Plot as the first list item */}
+        <ListItem>
+          <Typography variant="h6" sx={{ textAlign: 'center', width: '100%' }}>
+          <b>General Plot</b>: {plot}
+          </Typography>
+        </ListItem>
+
+        {/* Roles as subsequent list items */}
+        {roles.map((roleEntry, index) => (
+          <ListItem key={index} alignItems="flex-start">
+            <Card sx={{ width: '100%'}}>
+              <CardContent>
+                <Typography variant="h5" component="div" color="text.cardTitle">
+                  {roleEntry.user || "Unknown Participant"}
+                </Typography>
+                <Typography variant="body2" color="text.cardTitle">
+                  <b>Background:</b> {roleEntry.card.background}
+                </Typography>
+                <Typography variant="body2" color="text.cardTitle">
+                  <b>Objective:</b> {roleEntry.card.objective}
+                </Typography>
+                <Typography variant="body2" color="text.cardTitle">
+                  <b>Secret:</b> {roleEntry.card.secret}
+                </Typography>
+                <Typography variant="body2" color="text.cardTitle">
+                <b>Item:</b> {roleEntry.card.item}
+                </Typography>
+              </CardContent>
+            </Card>
+          </ListItem>
+        ))}
+      </List>
     </Box>
   );
 }
-
+  
 export default FinalPage;

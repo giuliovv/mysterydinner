@@ -8,6 +8,7 @@ import StepPage from './pages/StepPage'; // Import the StepPage component
 import FinalPage from './pages/FinalPage';
 
 function App() {
+  console.log(process.env.REACT_APP_API_URL);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

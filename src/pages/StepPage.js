@@ -19,6 +19,8 @@ const initialSteps = [
         { label: "Abandoned Theater", value: "abandoned_theater" },
         { label: "Members' Club", value: "members_club" },
         { label: "Mysterious Library", value: "mysterious_library" },
+        { label: "Space Station", value: "space_station" },
+        { label: "Archeological mission in Egypt", value: "egypt" },
         { label: "Custom...", value: "custom" }
       ] 
     },
@@ -26,10 +28,10 @@ const initialSteps = [
         type: 'text', 
         question: "How many partecipants?"
       },
-    { 
-        type: 'text', 
-        question: "Adding some other details?" 
-      },
+    // { 
+    //     type: 'text', 
+    //     question: "Adding some other details?" 
+    //   },
   ];
 
 function StepPage() {
@@ -118,7 +120,9 @@ function StepPage() {
 
   const handleFinish = () => {
     // Structure participants' data if needed
-    navigate('/final', { state: { participants: answers.filter(answer => typeof answer === 'object') } });
+    const settingAnswer = answers[0]; // Assuming the setting question is at index 0
+    const participants = answers.filter(answer => typeof answer === 'object');
+    navigate('/final', { state: { setting: settingAnswer, participants } });
   };
 
   const renderStepContent = (step, stepIndex) => {
