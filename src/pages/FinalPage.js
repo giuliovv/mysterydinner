@@ -1,11 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Box, List, ListItem, Card, CardContent, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import OpenAI from 'openai';
-import API_KEY from '../components/ApiKey';
-
-// const openai = new OpenAI({ apiKey: process.env.REACT_APP_SECRET_NAME, dangerouslyAllowBrowser: true });
-const openai = new OpenAI({ apiKey: API_KEY, dangerouslyAllowBrowser: true })
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 function FinalPage() {
   const [roles, setRoles] = useState([]);
@@ -23,6 +19,8 @@ function FinalPage() {
   useEffect(() => {
 
     async function generateRolesAndPlot(participants) {
+        const functions = getFunctions(); // Initialize Firebase Functions
+        const generateMysteryPlot = httpsCallable(functions, 'generateMysteryPlot');
         // Construct the initial messages sent to the model, including instructions
         let messages = [
           {
@@ -95,24 +93,13 @@ function FinalPage() {
       
         try {
           // Send the completion request to OpenAI
-          const completion = await openai.chat.completions.create({
-            // model: "gpt-3.5-turbo",
-            model: "gpt-4-turbo-preview",
-            messages: messages,
-            response_format: { "type": "json_object" },
-            temperature: 1.2,
-            // max_tokens: 1024,
-          });
-      
-          const generatedContent = completion.choices[0].message.content;
-          const responseData = JSON.parse(generatedContent);
+          const result = await generateMysteryPlot({ messages });
+          console.log("ECCOCI")
+          console.log(result);
+          const { roles, plot } = result.data;
 
-          setRoles(responseData.roles);
-          setPlot(responseData.plot);
-
-          console.log(generatedContent);
-      
-          return generatedContent;
+          setRoles(roles);
+          setPlot(plot);
         } catch (error) {
           console.error("Error calling OpenAI:", error);
         }
