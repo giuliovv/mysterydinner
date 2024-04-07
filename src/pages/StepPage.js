@@ -174,15 +174,16 @@ function StepPage() {
 
   return (
     <Box 
-      sx={{ 
+    sx={{ 
         display: 'flex', 
         flexDirection: 'column', 
         justifyContent: 'center', // This centers content vertically
         alignItems: 'center', // This centers content horizontally
-        height: '100vh', // Adjust as necessary to fit your design
+        minHeight: '100vh', // Changed from height to minHeight
         width: '100%',
-        p: 4 // Padding, adjust as necessary
-      }}
+        p: 4, // Padding, adjust as necessary
+        overflow: 'auto' // Ensures that content can scroll if it exceeds the height
+    }}
     >
       <Typography variant="h4" gutterBottom>
         {steps[currentStep].question}
