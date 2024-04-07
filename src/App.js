@@ -1,10 +1,10 @@
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme'; // Assuming you have your theme setup here
+import theme from './theme'; // Ensure your theme is correctly set up
 import HomePage from './pages/HomePage';
+import StepPage from './pages/StepPage'; // Import the StepPage component
 
 function App() {
   return (
@@ -13,6 +13,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/steps" element={<StepPage />} />
         </Routes>
       </Router>
     </ThemeProvider>
