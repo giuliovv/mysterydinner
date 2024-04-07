@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/mysterydinner/static/css/main.e6c13ad2.css",
-    "main.js": "/mysterydinner/static/js/main.dc936456.js",
+    "main.js": "/mysterydinner/static/js/main.ca7d0ecb.js",
     "static/js/453.20a4d6a7.chunk.js": "/mysterydinner/static/js/453.20a4d6a7.chunk.js",
     "static/media/art_deco.png": "/mysterydinner/static/media/art_deco.14a0c3c34614f93b4bad.png",
     "index.html": "/mysterydinner/index.html",
     "main.e6c13ad2.css.map": "/mysterydinner/static/css/main.e6c13ad2.css.map",
-    "main.dc936456.js.map": "/mysterydinner/static/js/main.dc936456.js.map",
+    "main.ca7d0ecb.js.map": "/mysterydinner/static/js/main.ca7d0ecb.js.map",
     "453.20a4d6a7.chunk.js.map": "/mysterydinner/static/js/453.20a4d6a7.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.dc936456.js"
+    "static/js/main.ca7d0ecb.js"
   ]
 }

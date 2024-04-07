@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Murder Mystery Dinner generator",
+  "name": "Generate stories for you murder mystery dinner parties",
   "icons": [
     {
       "src": "favicon.ico",
